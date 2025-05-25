@@ -16,6 +16,12 @@ def main(train_path, eval_path, pred_path):
     x_train, y_train = util.load_dataset(train_path, add_intercept=False)
 
     # *** START CODE HERE ***
+    x_eval, y_eval = util.load_dataset(eval_path, add_intercept=False)
+
+    model = GDA()
+    model.fit(x_train, y_train)
+    y_pred = model.predict(x_eval)
+    np.savetxt(pred_path, y_pred > 0.5, fmt='%d')
     # *** END CODE HERE ***
 
 
@@ -39,6 +45,18 @@ class GDA(LinearModel):
             theta: GDA model parameters.
         """
         # *** START CODE HERE ***
+        m = x.shape[0]
+        y__1 = sum(y == 1)
+        y__0 = sum(y == 0)
+
+        phi = (1 / m) * y__1
+        miu_0 = sum((y == 0) * x) / y__0
+        miu_1 = sum((y == 1) * x) / y__1
+        sigma = ((x - miu_0).dot((x - miu_0).T) + (x - miu_1).dot((x - miu_1).T)) / m
+        sigma_inv = np.linalg.inv(sigma)
+
+        self.theta[1:] = sigma_inv.dot(miu_1 - miu_0)
+        self.theta[0] = (((miu_0 + miu_1).T.dot(sigma_inv).dot(miu_0 - miu_1)) / 2) - np.log((1 - phi) / phi)
         # *** END CODE HERE ***
 
     def predict(self, x):
@@ -51,4 +69,5 @@ class GDA(LinearModel):
             Outputs of shape (m,).
         """
         # *** START CODE HERE ***
+        return 1 / (1 + np.exp(-(self.theta[1:].dot(x) + self.theta[0])))
         # *** END CODE HERE
