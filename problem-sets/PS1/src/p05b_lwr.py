@@ -17,9 +17,14 @@ def main(tau, train_path, eval_path):
     x_train, y_train = util.load_dataset(train_path, add_intercept=True)
 
     # *** START CODE HERE ***
+    x_eval, y_eval = util.load_dataset(eval_path, add_intercept=True)
     # Fit a LWR model
+    LWR = LocallyWeightedLinearRegression(0.5)
+    LWR.fit(x_train, y_train)
     # Get MSE value on the validation set
+
     # Plot validation predictions on top of training set
+
     # No need to save predictions
     # Plot data
     # *** END CODE HERE ***
@@ -41,10 +46,10 @@ class LocallyWeightedLinearRegression(LinearModel):
         self.y = None
 
     def fit(self, x, y):
-        """Fit LWR by saving the training set.
-
-        """
+        """Fit LWR by saving the training set."""
         # *** START CODE HERE ***
+        self.x = x
+        self.y = y
         # *** END CODE HERE ***
 
     def predict(self, x):
@@ -57,4 +62,11 @@ class LocallyWeightedLinearRegression(LinearModel):
             Outputs of shape (m,).
         """
         # *** START CODE HERE ***
+        m, n = x.shape
+        y_pred = np.zeros(m)
+        for i in range(m):
+            w = np.diag(np.exp(-np.sum(x[i] - self.x) ** 2, axis = 1) / 2 * self.tau ** 2)
+            y_pred[i] = (np.linalg.inv(self.x.T.dot(w.dot(self.x))).dot(self.x.T).dot(w).dot(self.y)).T.dot(x[i])
+
+        return y_pred
         # *** END CODE HERE ***

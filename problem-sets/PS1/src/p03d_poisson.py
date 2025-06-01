@@ -15,12 +15,19 @@ def main(lr, train_path, eval_path, pred_path):
     """
     # Load training set
     x_train, y_train = util.load_dataset(train_path, add_intercept=True)
+    x_eval, y_eval = util.load_dataset(eval_path, add_intercept=True)
+
     # The line below is the original one from Stanford. It does not include the intercept, but this should be added.
     # x_train, y_train = util.load_dataset(train_path, add_intercept=False)
 
     # *** START CODE HERE ***
     # Fit a Poisson Regression model
+    model = PoissonRegression(step_size=lr)
+    model.fit(x_train, y_train)
+    y_pred = model.predict(x_eval)
+
     # Run on the validation set, and use np.savetxt to save outputs to pred_path
+    np.savetxt(pred_path, y_pred, "pred_samples")
     # *** END CODE HERE ***
 
 
@@ -35,12 +42,21 @@ class PoissonRegression(LinearModel):
 
     def fit(self, x, y):
         """Run gradient ascent to maximize likelihood for Poisson regression.
-
         Args:
             x: Training example inputs. Shape (m, n).
             y: Training example labels. Shape (m,).
         """
         # *** START CODE HERE ***
+        m, n = x.shape
+        self.theta = np.zeros(n)
+
+        while True:
+            theta = np.copy(self.theta)
+            self.theta += self.step_size * x.T.dot(y - np.exp(theta.T.dot(x))) / m
+
+            if np.linalg.norm(self.theta - theta, ord = 1) < self.eps:
+                break
+
         # *** END CODE HERE ***
 
     def predict(self, x):
@@ -53,4 +69,5 @@ class PoissonRegression(LinearModel):
             Floating-point prediction for each input, shape (m,).
         """
         # *** START CODE HERE ***
+        return np.exp(self.theta.T.dot(x))
         # *** END CODE HERE ***

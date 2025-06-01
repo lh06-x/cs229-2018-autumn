@@ -75,7 +75,6 @@ class LogisticRegression(LinearModel):
                 print(f"Converged after {i + 1} iterations")
                 break
 
-        self.theta = new_theta
         return self
 
         # *** END CODE HERE ***
