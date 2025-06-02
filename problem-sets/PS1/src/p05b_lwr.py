@@ -22,9 +22,15 @@ def main(tau, train_path, eval_path):
     LWR = LocallyWeightedLinearRegression(0.5)
     LWR.fit(x_train, y_train)
     # Get MSE value on the validation set
-
+    y_pred = LWR.predict(x_eval)
+    MSE = np.mean((y_pred - y_eval) ** 2)
     # Plot validation predictions on top of training set
-
+    plt.figure()
+    plt.plot(x_train, y_train, 'bx', linewidth = 2)
+    plt.plot(x_eval, y_pred, 'ro', linewidth = 2)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.savefig('output/p05b.png')
     # No need to save predictions
     # Plot data
     # *** END CODE HERE ***
